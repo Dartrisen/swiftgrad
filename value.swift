@@ -110,10 +110,20 @@ final class Value: ArithmeticOperations, CustomStringConvertible {
     }
 
     func exp() -> Value {
-        let out = Value(Darwin.exp(data), _children: [self], _op: "exp")
+        let out = Value(Foundation.exp(data), _children: [self], _op: "exp")
 
         out._backward = {
             self.grad += out.data * out.grad
+        }
+        return out
+    }
+
+    func tanh() -> Value {
+        let t = Foundation.tanh(data)
+        let out = Value(t, _children: [self], _op: "tanh")
+        out._backward = { [weak self] in
+            guard let self = self else { return }
+            self.grad += (1 - t * t) * out.grad
         }
         return out
     }
@@ -149,39 +159,3 @@ extension Value: Hashable {
         hasher.combine(ObjectIdentifier(self))
     }
 }
-
-// Define inputs
-let x1 = Value(2.0, label: "x1")
-let x2 = Value(0.0, label: "x2")
-
-// Define weights
-let w1 = Value(-3.0, label: "w1")
-let w2 = Value(1.0, label: "w2")
-
-// Define bias
-let b = Value(6.8813735870195432, label: "b")
-
-// Perform operations
-let x1w1 = x1 * w1
-x1w1.label = "x1*w1"
-
-let x2w2 = x2 * w2
-x2w2.label = "x2*w2"
-
-let x1w1x2w2 = x1w1 + x2w2
-x1w1x2w2.label = "x1*w1 + x2*w2"
-
-let n = x1w1x2w2 + b
-n.label = "n"
-
-let e = (2 * n).exp()
-let o = (e - 1) / (e + 1)
-o.label = "o"
-o.backward()
-
-// Print results
-print(x1w1)
-print(x2w2)
-print(x1w1x2w2)
-print(n)
-print(o)
