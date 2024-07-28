@@ -41,6 +41,27 @@ final class Value: ArithmeticOperations, CustomStringConvertible {
         }
         return out
     }
+
+    func backward() {
+        var topo: [Value] = []
+        var visited: Set<Value> = []
+
+        func buildTopo(_ v: Value) {
+            if !visited.contains(v) {
+                visited.insert(v)
+                for child in v._prev {
+                    buildTopo(child)
+                }
+                topo.append(v)
+            }
+        }
+
+        buildTopo(self)
+        self.grad = 1.0
+        for v in topo.reversed() {
+            v._backward()
+        }
+    }
 }
 
 extension Value: Hashable {
@@ -68,5 +89,18 @@ let b = Value(6.8813735870195432, label: "b")
 let x1w1 = x1 * w1
 x1w1.label = "x1*w1"
 
+let x2w2 = x2 * w2
+x2w2.label = "x2*w2"
+
+let x1w1x2w2 = x1w1 + x2w2
+x1w1x2w2.label = "x1*w1 + x2*w2"
+
+let n = x1w1x2w2 + b
+n.label = "n"
+n.backward()
+
 // Print results
 print(x1w1)
+print(x2w2)
+print(x1w1x2w2)
+print(n)
