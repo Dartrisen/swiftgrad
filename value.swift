@@ -2,7 +2,9 @@ import Foundation
 
 protocol ArithmeticOperations {
     static func + (lhs: Self, rhs: Self) -> Self
+    static func + (lhs: Self, rhs: Double) -> Self
     static func * (lhs: Self, rhs: Self) -> Self
+    static func * (lhs: Double, rhs: Self) -> Self
 }
 
 final class Value: ArithmeticOperations, CustomStringConvertible {
@@ -33,11 +35,28 @@ final class Value: ArithmeticOperations, CustomStringConvertible {
         return out
     }
 
+    static func + (lhs: Value, rhs: Double) -> Value {
+        return lhs + Value(rhs)
+    }
+
     static func * (lhs: Value, rhs: Value) -> Value {
         let out = Value(lhs.data * rhs.data, _children: [lhs, rhs], _op: "*")
         out._backward = {
             lhs.grad += rhs.data * out.grad
             rhs.grad += lhs.data * out.grad
+        }
+        return out
+    }
+
+    static func * (lhs: Double, rhs: Value) -> Value {
+        return Value(lhs) * rhs
+    }
+
+    func exp() -> Value {
+        let out = Value(Darwin.exp(data), _children: [self], _op: "exp")
+
+        out._backward = {
+            self.grad += out.data * out.grad
         }
         return out
     }
@@ -97,10 +116,14 @@ x1w1x2w2.label = "x1*w1 + x2*w2"
 
 let n = x1w1x2w2 + b
 n.label = "n"
-n.backward()
+
+let e = (2 * n).exp()
+e.label = "e"
+e.backward()
 
 // Print results
 print(x1w1)
 print(x2w2)
 print(x1w1x2w2)
 print(n)
+print(e)
