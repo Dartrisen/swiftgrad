@@ -7,6 +7,8 @@ protocol ArithmeticOperations {
 
 final class Value: ArithmeticOperations, CustomStringConvertible {
     var data: Double
+    var grad: Double = 0.0
+    var _backward: () -> Void = {}
     var _prev: Set<Value>
     var _op: String
     var label: String
@@ -19,16 +21,24 @@ final class Value: ArithmeticOperations, CustomStringConvertible {
     }
 
     var description: String {
-        return "Value(label: \(label), data: \(data))"
+        return "Value(label: \(label), data: \(data), grad: \(grad))"
     }
 
     static func + (lhs: Value, rhs: Value) -> Value {
         let out = Value(lhs.data + rhs.data, _children: [lhs, rhs], _op: "+")
+        out._backward = {
+            lhs.grad += 1.0 * out.grad
+            rhs.grad += 1.0 * out.grad
+        }
         return out
     }
 
     static func * (lhs: Value, rhs: Value) -> Value {
         let out = Value(lhs.data * rhs.data, _children: [lhs, rhs], _op: "*")
+        out._backward = {
+            lhs.grad += rhs.data * out.grad
+            rhs.grad += lhs.data * out.grad
+        }
         return out
     }
 }
