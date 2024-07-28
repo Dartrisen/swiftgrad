@@ -3,9 +3,19 @@ import Foundation
 protocol ArithmeticOperations {
     static func + (lhs: Self, rhs: Self) -> Self
     static func + (lhs: Self, rhs: Double) -> Self
+    static func + (lhs: Double, rhs: Self) -> Self
+    static func - (lhs: Self, rhs: Self) -> Self
+    static func - (lhs: Self, rhs: Double) -> Self
+    static prefix func - (v: Self) -> Self
     static func * (lhs: Self, rhs: Self) -> Self
     static func * (lhs: Double, rhs: Self) -> Self
+    static func * (lhs: Self, rhs: Double) -> Self
+    static func / (lhs: Self, rhs: Self) -> Self
+    static func / (lhs: Self, rhs: Double) -> Self
+    static func / (lhs: Double, rhs: Self) -> Self
 }
+
+infix operator **: MultiplicationPrecedence
 
 final class Value: ArithmeticOperations, CustomStringConvertible {
     var data: Double
@@ -28,6 +38,7 @@ final class Value: ArithmeticOperations, CustomStringConvertible {
 
     static func + (lhs: Value, rhs: Value) -> Value {
         let out = Value(lhs.data + rhs.data, _children: [lhs, rhs], _op: "+")
+
         out._backward = {
             lhs.grad += 1.0 * out.grad
             rhs.grad += 1.0 * out.grad
@@ -39,8 +50,29 @@ final class Value: ArithmeticOperations, CustomStringConvertible {
         return lhs + Value(rhs)
     }
 
+    static func + (lhs: Double, rhs: Value) -> Value {
+        return Value(lhs) + rhs
+    }
+
+    static prefix func - (v: Value) -> Value {
+        return v * -1.0
+    }
+
+    static func - (lhs: Value, rhs: Value) -> Value {
+        return lhs + (-rhs)
+    }
+
+    static func - (lhs: Value, rhs: Double) -> Value {
+        return lhs - Value(rhs)
+    }
+
+    static func - (lhs: Double, rhs: Value) -> Value {
+        return Value(lhs) - rhs
+    }
+
     static func * (lhs: Value, rhs: Value) -> Value {
         let out = Value(lhs.data * rhs.data, _children: [lhs, rhs], _op: "*")
+
         out._backward = {
             lhs.grad += rhs.data * out.grad
             rhs.grad += lhs.data * out.grad
@@ -48,8 +80,33 @@ final class Value: ArithmeticOperations, CustomStringConvertible {
         return out
     }
 
+    static func * (lhs: Value, rhs: Double) -> Value {
+        return lhs * Value(rhs)
+    }
+
     static func * (lhs: Double, rhs: Value) -> Value {
         return Value(lhs) * rhs
+    }
+
+    static func ** (lhs: Value, rhs: Double) -> Value {
+        let out = Value(pow(lhs.data, rhs), _children: [lhs], _op: "**\(rhs)")
+
+        out._backward = {
+            lhs.grad += rhs * pow(lhs.data, rhs - 1) * out.grad
+        }
+        return out
+    }
+
+    static func / (lhs: Value, rhs: Value) -> Value {
+        return lhs * (rhs ** -1)
+    }
+
+    static func / (lhs: Value, rhs: Double) -> Value {
+        return lhs / Value(rhs)
+    }
+
+    static func / (lhs: Double, rhs: Value) -> Value {
+        return Value(lhs) / rhs
     }
 
     func exp() -> Value {
@@ -118,12 +175,13 @@ let n = x1w1x2w2 + b
 n.label = "n"
 
 let e = (2 * n).exp()
-e.label = "e"
-e.backward()
+let o = (e - 1) / (e + 1)
+o.label = "o"
+o.backward()
 
 // Print results
 print(x1w1)
 print(x2w2)
 print(x1w1x2w2)
 print(n)
-print(e)
+print(o)
