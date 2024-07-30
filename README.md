@@ -5,6 +5,7 @@ A small autograd engine based on Karpathy's [repo](https://github.com/karpathy/m
 # Installation
 
 `swiftc -o main value.swift module.swift neuron.swift layer.swift mlp.swift main.swift`
+
 `./main`
 
 # Example
