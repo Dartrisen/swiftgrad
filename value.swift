@@ -17,7 +17,7 @@ protocol ArithmeticOperations {
 
 infix operator **: MultiplicationPrecedence
 
-final class Value: ArithmeticOperations, CustomStringConvertible {
+final class Value: CustomStringConvertible {
     var data: Double
     var grad: Double = 0.0
     var _backward: () -> Void = {}
@@ -34,79 +34,6 @@ final class Value: ArithmeticOperations, CustomStringConvertible {
 
     var description: String {
         return "Value(label: \(label), data: \(data), grad: \(grad))"
-    }
-
-    static func + (lhs: Value, rhs: Value) -> Value {
-        let out = Value(lhs.data + rhs.data, _children: [lhs, rhs], _op: "+")
-
-        out._backward = {
-            lhs.grad += 1.0 * out.grad
-            rhs.grad += 1.0 * out.grad
-        }
-        return out
-    }
-
-    static func + (lhs: Value, rhs: Double) -> Value {
-        return lhs + Value(rhs)
-    }
-
-    static func + (lhs: Double, rhs: Value) -> Value {
-        return Value(lhs) + rhs
-    }
-
-    static prefix func - (v: Value) -> Value {
-        return v * -1.0
-    }
-
-    static func - (lhs: Value, rhs: Value) -> Value {
-        return lhs + (-rhs)
-    }
-
-    static func - (lhs: Value, rhs: Double) -> Value {
-        return lhs - Value(rhs)
-    }
-
-    static func - (lhs: Double, rhs: Value) -> Value {
-        return Value(lhs) - rhs
-    }
-
-    static func * (lhs: Value, rhs: Value) -> Value {
-        let out = Value(lhs.data * rhs.data, _children: [lhs, rhs], _op: "*")
-
-        out._backward = {
-            lhs.grad += rhs.data * out.grad
-            rhs.grad += lhs.data * out.grad
-        }
-        return out
-    }
-
-    static func * (lhs: Value, rhs: Double) -> Value {
-        return lhs * Value(rhs)
-    }
-
-    static func * (lhs: Double, rhs: Value) -> Value {
-        return Value(lhs) * rhs
-    }
-
-    static func ** (lhs: Value, rhs: Double) -> Value {
-        let out = Value(pow(lhs.data, rhs), _children: [lhs], _op: "**\(rhs)")
-
-        out._backward = {
-            lhs.grad += rhs * pow(lhs.data, rhs - 1) * out.grad
-        }
-        return out
-    }
-
-    static func / (lhs: Value, rhs: Value) -> Value {
-        return lhs * (rhs ** -1)
-    }
-
-    static func / (lhs: Value, rhs: Double) -> Value {
-        return lhs / Value(rhs)
-    }
-
-    static func / (lhs: Double, rhs: Value) -> Value {
-        return Value(lhs) / rhs
     }
 
     func exp() -> Value {
@@ -157,5 +84,79 @@ extension Value: Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(ObjectIdentifier(self))
+    }
+}
+
+extension Value: ArithmeticOperations {
+    static func + (lhs: Value, rhs: Value) -> Value {
+        let out = Value(lhs.data + rhs.data, _children: [lhs, rhs], _op: "+")
+        out._backward = { [weak lhs, weak rhs] in
+            lhs?.grad += out.grad
+            rhs?.grad += out.grad
+        }
+        return out
+    }
+
+    static func * (lhs: Value, rhs: Value) -> Value {
+        let out = Value(lhs.data * rhs.data, _children: [lhs, rhs], _op: "*")
+
+        out._backward = { [weak lhs, weak rhs] in
+            lhs?.grad += (rhs?.data ?? 0) * out.grad
+            rhs?.grad += (lhs?.data ?? 0) * out.grad
+        }
+        return out
+    }
+
+    static func ** (lhs: Value, rhs: Double) -> Value {
+        let out = Value(pow(lhs.data, rhs), _children: [lhs], _op: "**\(rhs)")
+
+        out._backward = {
+            lhs.grad += rhs * pow(lhs.data, rhs - 1) * out.grad
+        }
+        return out
+    }
+
+    static func + (lhs: Value, rhs: Double) -> Value {
+        return lhs + Value(rhs)
+    }
+
+    static func + (lhs: Double, rhs: Value) -> Value {
+        return Value(lhs) + rhs
+    }
+
+    static prefix func - (v: Value) -> Value {
+        return v * -1.0
+    }
+
+    static func - (lhs: Value, rhs: Value) -> Value {
+        return lhs + (-rhs)
+    }
+
+    static func - (lhs: Value, rhs: Double) -> Value {
+        return lhs - Value(rhs)
+    }
+
+    static func - (lhs: Double, rhs: Value) -> Value {
+        return Value(lhs) - rhs
+    }
+
+    static func * (lhs: Value, rhs: Double) -> Value {
+        return lhs * Value(rhs)
+    }
+
+    static func * (lhs: Double, rhs: Value) -> Value {
+        return Value(lhs) * rhs
+    }
+
+    static func / (lhs: Value, rhs: Value) -> Value {
+        return lhs * (rhs ** -1)
+    }
+
+    static func / (lhs: Value, rhs: Double) -> Value {
+        return lhs / Value(rhs)
+    }
+
+    static func / (lhs: Double, rhs: Value) -> Value {
+        return Value(lhs) / rhs
     }
 }
