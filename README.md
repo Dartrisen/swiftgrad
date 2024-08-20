@@ -2,11 +2,13 @@
 
 A small autograd engine based on Karpathy's [repo](https://github.com/karpathy/micrograd) written in Swift. Same approach, the neuron, layer, and MLP classes were implemented.
 
+This can be used on Mac machines without the need for PyTorch or other libraries. I would say that Swift is a nice language, and the true goal of this project is to build a small and fast competitor to Tinygrad on Mac machines for Swift users. If you would like to contribute, just send me a message on Twitter.
+
 # Installation
 
-`swiftc -o main value.swift module.swift neuron.swift layer.swift mlp.swift main.swift`
+`swift build`
 
-`./main`
+`swift run`
 
 # Example
 
@@ -46,3 +48,10 @@ func main() {
     }
 }
 ```
+
+# Further work
+- Threading / Acceleration / SIMD
+- Resolving the accessing issues (private/public) with Neuron/Layer/MLP
+- Tensors, tensoric operations
+- Boltzmann machines
+- LLMs ?
