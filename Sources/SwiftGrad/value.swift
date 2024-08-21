@@ -1,25 +1,5 @@
 import Foundation
 
-protocol BinaryOperations {
-    static func + (lhs: Self, rhs: Self) -> Self
-    static func + (lhs: Self, rhs: Double) -> Self
-    static func + (lhs: Double, rhs: Self) -> Self
-    static func - (lhs: Self, rhs: Self) -> Self
-    static func - (lhs: Self, rhs: Double) -> Self
-    static prefix func - (v: Self) -> Self
-    static func * (lhs: Self, rhs: Self) -> Self
-    static func * (lhs: Double, rhs: Self) -> Self
-    static func * (lhs: Self, rhs: Double) -> Self
-    static func / (lhs: Self, rhs: Self) -> Self
-    static func / (lhs: Self, rhs: Double) -> Self
-    static func / (lhs: Double, rhs: Self) -> Self
-}
-
-protocol UnaryOperations {
-    func tanh() -> Self
-    func exp() -> Value
-}
-
 infix operator **: MultiplicationPrecedence
 
 /// Represents a value in the computational graph, with support for automatic differentiation.
