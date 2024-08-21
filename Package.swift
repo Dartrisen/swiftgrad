@@ -4,13 +4,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "swiftgrad",
+    name: "SwiftGrad",
+    platforms: [
+        .macOS(.v10_15)
+    ],
     targets: [
         .executableTarget(
             name: "SwiftGrad",
             dependencies: []),
         .testTarget(
             name: "SwiftGradTests",
-            dependencies: ["SwiftGrad"]),
+            dependencies: ["SwiftGrad"],
+            path: "Tests/SwiftGradTests"),
     ]
 )

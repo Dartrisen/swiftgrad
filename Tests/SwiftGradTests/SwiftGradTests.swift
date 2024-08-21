@@ -1,4 +1,5 @@
 import XCTest
+@testable import SwiftGrad
 
 func XCTAssertAlmostEqual(_ a: Double, _ b: Double, tolerance: Double = 1e-6, file: StaticString = #file, line: UInt = #line) {
     XCTAssertTrue(abs(a - b) < tolerance, "Expected \(a) to be approximately equal to \(b)", file: file, line: line)
@@ -58,5 +59,3 @@ final class NeuronLayerTests: XCTestCase {
         print("Layer test passed.")
     }
 }
-
-NeuronLayerTests.defaultTestSuite.run()
