@@ -59,10 +59,10 @@ func main() {
         let loss = yPred
             .enumerated()
             .reduce(Value(0.0)) { (sum, elem) in
-            let (idx, pred) = elem
-            let diff = pred[0] - ys[idx]
-            return sum + (diff * diff)
-        }
+                let (idx, pred) = elem
+                let diff = pred[0] - ys[idx]
+                return sum + (diff * diff)
+            }
 
         // Backward
         model.zeroGrad()

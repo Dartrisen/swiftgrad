@@ -1,6 +1,6 @@
 import Foundation
 
-protocol ArithmeticOperations {
+protocol BinaryOperations {
     static func + (lhs: Self, rhs: Self) -> Self
     static func + (lhs: Self, rhs: Double) -> Self
     static func + (lhs: Double, rhs: Self) -> Self
@@ -15,12 +15,18 @@ protocol ArithmeticOperations {
     static func / (lhs: Double, rhs: Self) -> Self
 }
 
+protocol UnaryOperations {
+    func tanh() -> Self
+    func exp() -> Value
+}
+
 infix operator **: MultiplicationPrecedence
 
-final class Value: CustomStringConvertible {
+/// Represents a value in the computational graph, with support for automatic differentiation.
+final class Value: CustomStringConvertible, UnaryOperations {
     var data: Double
     var grad: Double = 0.0
-    var _backward: () -> Void = {}
+    var _backward: () -> () = {}
     var _prev: Set<Value>
     var _op: String
     var label: String
@@ -87,7 +93,7 @@ extension Value: Hashable {
     }
 }
 
-extension Value: ArithmeticOperations {
+extension Value: BinaryOperations {
     static func + (lhs: Value, rhs: Value) -> Value {
         let out = Value(lhs.data + rhs.data, _children: [lhs, rhs], _op: "+")
         out._backward = { [weak lhs, weak rhs] in
