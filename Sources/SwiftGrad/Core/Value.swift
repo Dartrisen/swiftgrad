@@ -3,7 +3,7 @@ import Foundation
 infix operator **: MultiplicationPrecedence
 
 /// Represents a value in the computational graph, with support for automatic differentiation.
-final class Value: CustomStringConvertible {
+final class Value {
     var data: Double
     var grad: Double = 0.0
     var _backward: () -> () = {}
@@ -24,25 +24,21 @@ final class Value: CustomStringConvertible {
         self.label = label
     }
 
-    var description: String {
-        return "Value(label: \(label), data: \(data), grad: \(grad))"
-    }
-
     func backward() {
         var topo: [Value] = []
         var visited: Set<Value> = []
 
-        func buildTopo(_ v: Value) {
+        func topoSort(_ v: Value) {
             if !visited.contains(v) {
                 visited.insert(v)
                 for child in v._prev {
-                    buildTopo(child)
+                    topoSort(child)
                 }
                 topo.append(v)
             }
         }
 
-        buildTopo(self)
+        topoSort(self)
         self.grad = 1.0
         for v in topo.reversed() {
             v._backward()
@@ -57,5 +53,11 @@ extension Value: Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(ObjectIdentifier(self))
+    }
+}
+
+extension Value: CustomStringConvertible {
+    var description: String {
+        return "Value(label: \(label), data: \(data), grad: \(grad))"
     }
 }
