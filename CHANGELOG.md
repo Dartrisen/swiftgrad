@@ -5,6 +5,7 @@
 #### Miscellaneous
 - protocols `BinaryOperations` and `UnaryOperations` have been separated from the Value implementation
 - project has been restructurized
+- added tests for `Value`, `Neuron` and `Layer` classes
 
 ## 1.0.0 (8 / 20 / 2024)
 

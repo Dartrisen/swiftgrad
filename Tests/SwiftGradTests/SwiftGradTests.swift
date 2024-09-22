@@ -112,3 +112,61 @@ class NeuronTests: XCTestCase {
         XCTAssertTrue(output.data >= -1.0 && output.data <= 1.0, "Output should be in the range of -1 to 1.")
     }
 }
+
+class LayerTests: XCTestCase {
+
+    // Test initialization of a Layer
+    func testInitialization() {
+        let inputSize = 3
+        let outputSize = 2
+        let layer = Layer(inputSize: inputSize, outputSize: outputSize)
+        
+        // Check that the correct number of neurons is initialized
+        XCTAssertEqual(layer.neurons.count, outputSize, "Layer should have \(outputSize) neurons")
+        
+        // Check that each neuron has the correct input size
+        for neuron in layer.neurons {
+            XCTAssertEqual(neuron.weights.count, inputSize, "Each neuron should have \(inputSize) weights")
+        }
+    }
+
+    // Test the forward method (simple forward pass)
+    func testForward() {
+        let inputSize = 3
+        let outputSize = 2
+        let layer = Layer(inputSize: inputSize, outputSize: outputSize)
+        
+        // Create test inputs
+        let inputs = (0..<inputSize).map { _ in Value(Double.random(in: -1...1)) }
+        
+        // Perform forward pass through the layer
+        let outputs = layer.forward(inputs)
+        
+        // Check that the number of outputs matches the number of neurons (output size)
+        XCTAssertEqual(outputs.count, outputSize, "The number of outputs should match the number of neurons (output size).")
+        
+        // Check that each output is a valid Value
+        for output in outputs {
+            XCTAssertNotNil(output.data, "Output should not be nil")
+        }
+    }
+
+    // Test that parameters method correctly aggregates all neuron parameters
+    func testParameters() {
+        let inputSize = 3
+        let outputSize = 2
+        let layer = Layer(inputSize: inputSize, outputSize: outputSize)
+        
+        // Collect all parameters from the layer
+        let parameters = layer.parameters
+        
+        // Check that the number of parameters is correct
+        let expectedParameterCount = (inputSize + 1) * outputSize // each neuron has `inputSize` weights + 1 bias
+        XCTAssertEqual(parameters.count, expectedParameterCount, "The number of parameters should be \(expectedParameterCount)")
+        
+        // Check that none of the parameters are nil
+        for param in parameters {
+            XCTAssertNotNil(param.data, "Parameter should not be nil")
+        }
+    }
+}
