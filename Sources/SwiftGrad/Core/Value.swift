@@ -1,7 +1,5 @@
 import Foundation
 
-infix operator **: MultiplicationPrecedence
-
 /// Represents a value in the computational graph, with support for automatic differentiation.
 final class Value {
     var data: Double
@@ -10,6 +8,7 @@ final class Value {
     var _prev: Set<Value>
     var _op: String
     var label: String
+    var cachedTopo: [Value]? = nil
 
     /// Initializes a new `Value` instance.
     ///
@@ -25,39 +24,14 @@ final class Value {
     }
 
     func backward() {
-        var topo: [Value] = []
-        var visited: Set<Value> = []
-
-        func topoSort(_ v: Value) {
-            if !visited.contains(v) {
-                visited.insert(v)
-                for child in v._prev {
-                    topoSort(child)
-                }
-                topo.append(v)
-            }
+        var topo = cachedTopo ?? []
+        if topo.isEmpty {
+            topo = topoSortIterative(self)
+            cachedTopo = topo
         }
-
-        topoSort(self)
         self.grad = 1.0
         for v in topo.reversed() {
             v._backward()
         }
-    }
-}
-
-extension Value: Hashable {
-    static func == (lhs: Value, rhs: Value) -> Bool {
-        return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(ObjectIdentifier(self))
-    }
-}
-
-extension Value: CustomStringConvertible {
-    var description: String {
-        return "Value(label: \(label), data: \(data), grad: \(grad))"
     }
 }

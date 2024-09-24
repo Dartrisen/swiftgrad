@@ -2,14 +2,16 @@
 
 ## 1.0.1 (XX / XX / 2024)
 
-#### Miscellaneous
-- protocols `BinaryOperations` and `UnaryOperations` have been separated from the Value implementation
-- project has been restructurized
-- added tests for `Value`, `Neuron` and `Layer` classes
+#### Improvements
+
+- Separated `BinaryOperations` and `UnaryOperations` protocols from the `Value` class implementation for better modularity.
+- Restructured the project for improved organization and maintainability.
+- Added unit tests for the `Value`, `Neuron`, and `Layer` classes to ensure reliability.
+- Optimized `topoSort` function with a more efficient iterative graph sorting algorithm.
 
 ## 1.0.0 (8 / 20 / 2024)
 
 #### Features
-- Value, Module, Neuron, Layer, MLP classes have been added
-- **binary operations** : + - * /
-- **unary operations** : tanh, exp
+- Introduced `Value`, `Module`, `Neuron`, `Layer`, and `MLP` classes.
+- **Binary operations**: Implemented addition (+), subtraction (-), multiplication (*), and division (/).
+- **Unary operations**: Added support for tanh and exp functions.

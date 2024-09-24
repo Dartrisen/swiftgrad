@@ -5,6 +5,8 @@ enum ValueError: Error {
     case invalidOperation(String)
 }
 
+infix operator **: MultiplicationPrecedence
+
 extension Value: BinaryOperations {
 
     static func + (lhs: Value, rhs: Value) -> Value {
